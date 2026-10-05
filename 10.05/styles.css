@@ -1,0 +1,21 @@
+* {
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+h1 {
+  color: darkblue;
+  text-align: center;
+}
+
+h2 {
+  color: darkgreen;
+  text-align: left;
+}
+
+div {
+  margin: 10px;
+  padding: 10px;
+  border: 1px solid black;
+}
+

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="script.js"></script>
+    <title>Repülőjáratok</title>
+  </head>
+  <body>
+    <h1>Repülőjáratok</h1>
+    <div>
+      <label for="jaratSzam">Járatszám:</label>
+      <input type="text" id="jaratSzam" />
+    </div>
+    <div>
+      <label for="indulasiIdo">Indulási idő:</label>
+      <input type="datetime-local" id="indulasiIdo" />
+    </div>
+    <div>
+      <label for="erkezesiIdo">Érkezési idő:</label>
+      <input type="datetime-local" id="erkezesiIdo" />
+    </div>
+    <div>
+      <label for="indulasiHely">Indulási hely:</label>
+      <input type="text" id="indulasiHely" />
+    </div>
+    <div>
+      <label for="erkezesiHely">Érkezési hely:</label>
+      <input type="text" id="erkezesiHely" />
+    </div>
+    <div>
+      <button onclick="jaratHozzaadas()">Hozzáadás</button>
+      <button onclick="jaratMentese()">Mentés</button>
+      <button onclick="jaratModositas()">Módosítás</button>
+      <button onclick="jaratListaMegjelenitese()">Megjelenit</button>
+      <input type="hidden" id="jaratId" />
+    </div>
+    <h2>Átszállások</h2>
+    <div id="jaratLista"></div>
+  </body>
+</html>
