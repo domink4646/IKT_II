@@ -18,6 +18,23 @@ const objRepuloJaratok = {
 };
 
 function jaratHozzaadas() {
+  if (
+    !document.getElementById("jaratSzam").value ||
+    !document.getElementById("indulasiIdo").value ||
+    !document.getElementById("erkezesiIdo").value ||
+    !document.getElementById("indulasiHely").value ||
+    !document.getElementById("erkezesiHely").value
+  ) {
+    alert("Kérlek töltsd ki az összes mezőt!");
+    return;
+  }
+
+  if (
+    document.getElementById("jaratSzam").value === objRepuloJaratok.jaratSzam
+  ) {
+    alert("A járatszám már létezik!");
+    return;
+  }
   const jaratSzam = document.getElementById("jaratSzam").value;
   const indulasiIdo = document.getElementById("indulasiIdo").value;
   const erkezesiIdo = document.getElementById("erkezesiIdo").value;
@@ -34,12 +51,15 @@ function jaratHozzaadas() {
   };
 
   objRepuloJaratok.atszallasok.push(ujJarat);
+
+  jaratListaMegjelenitese();
 }
 
 function jaratTorles(id) {
   objRepuloJaratok.atszallasok = objRepuloJaratok.atszallasok.filter(
     (jarat) => jarat.id !== id,
   );
+  jaratListaMegjelenitese();
 }
 
 function jaratModositas(id) {
@@ -52,6 +72,7 @@ function jaratModositas(id) {
     document.getElementById("erkezesiHely").value = jarat.erkezesiHely;
     document.getElementById("jaratId").value = jarat.id;
   }
+  jaratListaMegjelenitese();
 }
 
 function jaratMentese() {
@@ -64,6 +85,9 @@ function jaratMentese() {
     jarat.indulasiHely = document.getElementById("indulasiHely").value;
     jarat.erkezesiHely = document.getElementById("erkezesiHely").value;
   }
+  jaratListaMegjelenitese();
+  document.getElementById("jaratHozzaadasForm").reset();
+  document.getElementById("jaratId").value = "";
 }
 
 function jaratListaMegjelenitese() {
