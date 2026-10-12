@@ -1,41 +1,72 @@
 <!doctype html>
-<html lang="en">
+<html lang="hu">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="script.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
     <title>Repülőjáratok</title>
   </head>
   <body>
-    <h1>Repülőjáratok</h1>
-    <div>
-      <label for="jaratSzam">Járatszám:</label>
-      <input type="text" id="jaratSzam" />
-    </div>
-    <div>
-      <label for="indulasiIdo">Indulási idő:</label>
-      <input type="datetime-local" id="indulasiIdo" />
-    </div>
-    <div>
-      <label for="erkezesiIdo">Érkezési idő:</label>
-      <input type="datetime-local" id="erkezesiIdo" />
-    </div>
-    <div>
-      <label for="indulasiHely">Indulási hely:</label>
-      <input type="text" id="indulasiHely" />
-    </div>
-    <div>
-      <label for="erkezesiHely">Érkezési hely:</label>
-      <input type="text" id="erkezesiHely" />
-    </div>
-    <div>
-      <button onclick="jaratHozzaadas()">Hozzáadás</button>
-      <button onclick="jaratMentese()">Mentés</button>
-      <button onclick="jaratModositas()">Módosítás</button>
-      <button onclick="jaratListaMegjelenitese()">Megjelenit</button>
-      <input type="hidden" id="jaratId" />
-    </div>
-    <h2>Átszállások</h2>
-    <div id="jaratLista"></div>
+    <main class="page-shell">
+      <header class="page-header">
+        <p class="eyebrow">Repülési tervező</p>
+        <h1>Repülőjáratok</h1>
+        <p class="intro">Kezeld az útvonalhoz tartozó járatokat egy helyen.</p>
+      </header>
+
+      <section class="panel form-panel" aria-labelledby="form-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Új szakasz</p>
+            <h2 id="form-title">Járat adatai</h2>
+          </div>
+          <span id="formMode" class="mode-badge">Új járat</span>
+        </div>
+
+        <form id="jaratHozzaadasForm">
+          <div class="form-grid">
+            <label>
+              Járatszám
+              <input type="text" id="jaratSzam" placeholder="Például: LH123" required />
+            </label>
+            <label>
+              Indulási hely
+              <input type="text" id="indulasiHely" placeholder="Például: Budapest" required />
+            </label>
+            <label>
+              Indulási idő
+              <input type="datetime-local" id="indulasiIdo" required />
+            </label>
+            <label>
+              Érkezési hely
+              <input type="text" id="erkezesiHely" placeholder="Például: Frankfurt" required />
+            </label>
+            <label>
+              Érkezési idő
+              <input type="datetime-local" id="erkezesiIdo" required />
+            </label>
+          </div>
+          <input type="hidden" id="jaratId" />
+          <div class="form-actions">
+            <button class="button button-primary" type="submit" id="submitButton">Hozzáadás</button>
+            <button class="button button-secondary" type="button" id="cancelButton" hidden>Mégse</button>
+            <button class="button button-ghost" type="button" id="displayButton">Lista frissítése</button>
+          </div>
+        </form>
+        <p id="statusMessage" class="status-message" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="list-section" aria-labelledby="list-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Mentett adatok</p>
+            <h2 id="list-title">Átszállások</h2>
+          </div>
+          <span id="flightCount" class="count-badge">0 járat</span>
+        </div>
+        <div id="jaratLista" class="flight-list"></div>
+      </section>
+    </main>
   </body>
 </html>
