@@ -37,5 +37,124 @@
     </div>
     <h2>Átszállások</h2>
     <div id="jaratLista"></div>
+
+    <script>
+      const STORAGE_KEY = "repuloJaratok";
+      let objRepuloJaratok = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
+        id: 1,
+        jaratSzam: "LH123",
+        indulasiIdo: "2024-06-10T08:30:00",
+        erkezesiIdo: "2024-06-10T12:45:00",
+        indulasiHely: "Budapest",
+        erkezesiHely: "Frankfurt",
+        atszallasok: [],
+      };
+
+      function jaratHozzaadas() {
+        if (
+          !document.getElementById("jaratSzam").value ||
+          !document.getElementById("indulasiIdo").value ||
+          !document.getElementById("erkezesiIdo").value ||
+          !document.getElementById("indulasiHely").value ||
+          !document.getElementById("erkezesiHely").value
+        ) {
+          alert("Kérlek töltsd ki az összes mezőt!");
+          return;
+        }
+
+        const jarat = {
+          id: objRepuloJaratok.id++,
+          jaratSzam: document.getElementById("jaratSzam").value,
+          indulasiIdo: document.getElementById("indulasiIdo").value,
+          erkezesiIdo: document.getElementById("erkezesiIdo").value,
+          indulasiHely: document.getElementById("indulasiHely").value,
+          erkezesiHely: document.getElementById("erkezesiHely").value,
+        };
+
+        objRepuloJaratok.atszallasok.push(jarat);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(objRepuloJaratok));
+        document.getElementById("jaratHozzaadasForm").reset();
+        document.getElementById("jaratId").value = "";
+        jaratListaMegjelenitese();
+      }
+
+      function jaratTorles(id) {
+        objRepuloJaratok.atszallasok = objRepuloJaratok.atszallasok.filter(
+          (jarat) => jarat.id !== id,
+        );
+        jaratListaMegjelenitese();
+      }
+
+      function jaratModositas(id) {
+        const jarat = objRepuloJaratok.atszallasok.find(
+          (jarat) => jarat.id === id,
+        );
+        if (jarat) {
+          document.getElementById("jaratId").value = jarat.id;
+          document.getElementById("jaratSzam").value = jarat.jaratSzam;
+          document.getElementById("indulasiIdo").value = jarat.indulasiIdo;
+          document.getElementById("erkezesiIdo").value = jarat.erkezesiIdo;
+          document.getElementById("indulasiHely").value = jarat.indulasiHely;
+          document.getElementById("erkezesiHely").value = jarat.erkezesiHely;
+        }
+        jaratListaMegjelenitese();
+      }
+
+      function jaratMentese() {
+        const jaratId = parseInt(document.getElementById("jaratId").value);
+        const jaratIndex = objRepuloJaratok.atszallasok.findIndex(
+          (jarat) => jarat.id === jaratId,
+        );
+        if (jaratIndex !== -1) {
+          objRepuloJaratok.atszallasok[jaratIndex] = {
+            id: jaratId,
+            jaratSzam: document.getElementById("jaratSzam").value,
+            indulasiIdo: document.getElementById("indulasiIdo").value,
+            erkezesiIdo: document.getElementById("erkezesiIdo").value,
+            indulasiHely: document.getElementById("indulasiHely").value,
+            erkezesiHely: document.getElementById("erkezesiHely").value,
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(objRepuloJaratok));
+          document.getElementById("jaratHozzaadasForm").reset();
+          document.getElementById("jaratId").value = "";
+          jaratListaMegjelenitese();
+        }
+      }
+
+      function jaratListaMegjelenitese() {
+        const jaratListaDiv = document.getElementById("jaratLista");
+        jaratListaDiv.innerHTML = "";
+        objRepuloJaratok.atszallasok.forEach((jarat) => {
+          const jaratDiv = document.createElement("div");
+          jaratDiv.innerHTML = `
+            <strong>${jarat.jaratSzam}</strong> - ${jarat.indulasiHely} (${jarat.indulasiIdo}) -> ${jarat.erkezesiHely} (${jarat.erkezesiIdo})
+            <button onclick="jaratModositas(${jarat.id})">Módosítás</button>
+            <button onclick="jaratTorles(${jarat.id})">Törlés</button>
+          `;
+          jaratListaDiv.appendChild(jaratDiv);
+        });
+      }
+
+      document
+        .getElementById("jaratHozzaadasForm")
+        .addEventListener("submit", (event) => {
+          event.preventDefault();
+          const jaratId = document.getElementById("jaratId").value;
+          if (jaratId) {
+            jaratMentese();
+          } else {
+            jaratHozzaadas();
+          }
+        });
+
+      jaratListaMegjelenitese();
+      document.getElementById("jaratHozzaadasForm").reset();
+      document.getElementById("jaratId").value = "";
+      document.getElementById("jaratSzam").focus();
+      document.getElementById("indulasiIdo").value = "";
+      document.getElementById("erkezesiIdo").value = "";
+      document.getElementById("indulasiHely").value = "";
+      document.getElementById("erkezesiHely").value = "";
+    </script>
   </body>
 </html>
