@@ -1,0 +1,164 @@
+{
+  "flights": [
+    {
+      "id": 1,
+      "flightNumber": "LH123",
+      "departureTime": "2026-10-16T06:30",
+      "arrivalTime": "2026-10-16T08:00",
+      "departureLocation": "Budapest",
+      "arrivalLocation": "Frankfurt"
+    },
+    {
+      "id": 2,
+      "flightNumber": "BA456",
+      "departureTime": "2026-10-16T09:15",
+      "arrivalTime": "2026-10-16T11:00",
+      "departureLocation": "London",
+      "arrivalLocation": "Madrid"
+    },
+    {
+      "id": 3,
+      "flightNumber": "AF789",
+      "departureTime": "2026-10-16T12:20",
+      "arrivalTime": "2026-10-16T14:45",
+      "departureLocation": "Paris",
+      "arrivalLocation": "Rome"
+    },
+    {
+      "id": 4,
+      "flightNumber": "KL210",
+      "departureTime": "2026-10-17T07:40",
+      "arrivalTime": "2026-10-17T09:35",
+      "departureLocation": "Amsterdam",
+      "arrivalLocation": "Lisbon"
+    },
+    {
+      "id": 5,
+      "flightNumber": "IB321",
+      "departureTime": "2026-10-17T10:10",
+      "arrivalTime": "2026-10-17T12:50",
+      "departureLocation": "Madrid",
+      "arrivalLocation": "Barcelona"
+    },
+    {
+      "id": 6,
+      "flightNumber": "OS654",
+      "departureTime": "2026-10-17T13:25",
+      "arrivalTime": "2026-10-17T14:25",
+      "departureLocation": "Vienna",
+      "arrivalLocation": "Prague"
+    },
+    {
+      "id": 7,
+      "flightNumber": "LX987",
+      "departureTime": "2026-10-18T06:50",
+      "arrivalTime": "2026-10-18T08:20",
+      "departureLocation": "Zurich",
+      "arrivalLocation": "Berlin"
+    },
+    {
+      "id": 8,
+      "flightNumber": "SK135",
+      "departureTime": "2026-10-18T09:30",
+      "arrivalTime": "2026-10-18T11:05",
+      "departureLocation": "Copenhagen",
+      "arrivalLocation": "Stockholm"
+    },
+    {
+      "id": 9,
+      "flightNumber": "AY246",
+      "departureTime": "2026-10-18T12:15",
+      "arrivalTime": "2026-10-18T14:25",
+      "departureLocation": "Helsinki",
+      "arrivalLocation": "Oslo"
+    },
+    {
+      "id": 10,
+      "flightNumber": "TP357",
+      "departureTime": "2026-10-19T08:00",
+      "arrivalTime": "2026-10-19T10:50",
+      "departureLocation": "Lisbon",
+      "arrivalLocation": "Dublin"
+    },
+    {
+      "id": 11,
+      "flightNumber": "FR468",
+      "departureTime": "2026-10-19T11:20",
+      "arrivalTime": "2026-10-19T13:05",
+      "departureLocation": "Dublin",
+      "arrivalLocation": "Milan"
+    },
+    {
+      "id": 12,
+      "flightNumber": "AZ579",
+      "departureTime": "2026-10-19T14:10",
+      "arrivalTime": "2026-10-19T16:00",
+      "departureLocation": "Rome",
+      "arrivalLocation": "Athens"
+    },
+    {
+      "id": 13,
+      "flightNumber": "A312",
+      "departureTime": "2026-10-20T07:25",
+      "arrivalTime": "2026-10-20T09:10",
+      "departureLocation": "Athens",
+      "arrivalLocation": "Istanbul"
+    },
+    {
+      "id": 14,
+      "flightNumber": "TK683",
+      "departureTime": "2026-10-20T10:45",
+      "arrivalTime": "2026-10-20T12:20",
+      "departureLocation": "Istanbul",
+      "arrivalLocation": "Ankara"
+    },
+    {
+      "id": 15,
+      "flightNumber": "EK794",
+      "departureTime": "2026-10-20T15:30",
+      "arrivalTime": "2026-10-21T00:10",
+      "departureLocation": "Dubai",
+      "arrivalLocation": "Singapore"
+    },
+    {
+      "id": 16,
+      "flightNumber": "SQ805",
+      "departureTime": "2026-10-21T08:40",
+      "arrivalTime": "2026-10-21T11:20",
+      "departureLocation": "Singapore",
+      "arrivalLocation": "Bangkok"
+    },
+    {
+      "id": 17,
+      "flightNumber": "TG916",
+      "departureTime": "2026-10-21T13:00",
+      "arrivalTime": "2026-10-21T16:15",
+      "departureLocation": "Bangkok",
+      "arrivalLocation": "Tokyo"
+    },
+    {
+      "id": 18,
+      "flightNumber": "JL227",
+      "departureTime": "2026-10-22T09:05",
+      "arrivalTime": "2026-10-22T11:45",
+      "departureLocation": "Tokyo",
+      "arrivalLocation": "Seoul"
+    },
+    {
+      "id": 19,
+      "flightNumber": "KE338",
+      "departureTime": "2026-10-22T14:30",
+      "arrivalTime": "2026-10-22T20:20",
+      "departureLocation": "Seoul",
+      "arrivalLocation": "Vancouver"
+    },
+    {
+      "id": 20,
+      "flightNumber": "AC449",
+      "departureTime": "2026-10-23T08:15",
+      "arrivalTime": "2026-10-23T10:35",
+      "departureLocation": "Vancouver",
+      "arrivalLocation": "San Francisco"
+    }
+  ]
+}

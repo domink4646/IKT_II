@@ -1,215 +1,294 @@
 const STORAGE_KEY = "repuloJaratok";
+const DEFAULT_DATA_URL = "flights.json";
 
 const form = document.getElementById("jaratHozzaadasForm");
-const lista = document.getElementById("jaratLista");
-const jaratIdInput = document.getElementById("jaratId");
+const flightList = document.getElementById("jaratLista");
+const flightIdInput = document.getElementById("jaratId");
 const statusMessage = document.getElementById("statusMessage");
 const formMode = document.getElementById("formMode");
 const submitButton = document.getElementById("submitButton");
 const cancelButton = document.getElementById("cancelButton");
 const flightCount = document.getElementById("flightCount");
 
-const mezok = {
-  jaratSzam: document.getElementById("jaratSzam"),
-  indulasiIdo: document.getElementById("indulasiIdo"),
-  erkezesiIdo: document.getElementById("erkezesiIdo"),
-  indulasiHely: document.getElementById("indulasiHely"),
-  erkezesiHely: document.getElementById("erkezesiHely"),
+const fields = {
+  flightNumber: document.getElementById("jaratSzam"),
+  departureTime: document.getElementById("indulasiIdo"),
+  arrivalTime: document.getElementById("erkezesiIdo"),
+  departureLocation: document.getElementById("indulasiHely"),
+  arrivalLocation: document.getElementById("erkezesiHely"),
 };
 
-let objRepuloJaratok = betoltAdatokat();
+let flightData = createEmptyFlightData();
+let messageTimeoutId;
 
-function betoltAdatokat() {
-  const mentettAdatok = localStorage.getItem(STORAGE_KEY);
-
-  if (!mentettAdatok) {
-    return uresJaratLista();
-  }
-
-  try {
-    const adatok = JSON.parse(mentettAdatok);
-
-    if (adatok && Array.isArray(adatok.atszallasok)) {
-      return adatok;
-    }
-  } catch (error) {
-    console.error("A mentett járatok betöltése sikertelen:", error);
-  }
-
-  return uresJaratLista();
+function createEmptyFlightData() {
+  return { flights: [] };
 }
 
-function uresJaratLista() {
+function normalizeFlightData(data) {
+  const flights = Array.isArray(data?.flights)
+    ? data.flights
+    : Array.isArray(data?.atszallasok)
+      ? data.atszallasok.map((flight) => ({
+          id: flight.id,
+          flightNumber: flight.jaratSzam,
+          departureTime: flight.indulasiIdo,
+          arrivalTime: flight.erkezesiIdo,
+          departureLocation: flight.indulasiHely,
+          arrivalLocation: flight.erkezesiHely,
+        }))
+      : null;
+
+  if (!flights) {
+    return null;
+  }
+
   return {
-    id: 1,
-    jaratSzam: "",
-    indulasiIdo: "",
-    erkezesiIdo: "",
-    indulasiHely: "",
-    erkezesiHely: "",
-    atszallasok: [],
+    flights: flights
+      .filter((flight) => flight && Number.isFinite(Number(flight.id)))
+      .map((flight) => ({
+        id: Number(flight.id),
+        flightNumber: String(flight.flightNumber || "").trim(),
+        departureTime: String(flight.departureTime || ""),
+        arrivalTime: String(flight.arrivalTime || ""),
+        departureLocation: String(flight.departureLocation || "").trim(),
+        arrivalLocation: String(flight.arrivalLocation || "").trim(),
+      })),
   };
 }
 
-function mentsdAzAdatokat() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(objRepuloJaratok));
+function readStoredData() {
+  try {
+    const storedData = localStorage.getItem(STORAGE_KEY);
+
+    if (!storedData) {
+      return null;
+    }
+
+    return normalizeFlightData(JSON.parse(storedData));
+  } catch (error) {
+    console.error("A mentett járatok betöltése sikertelen:", error);
+    return null;
+  }
 }
 
-function olvasdKiAzUrlapAdatokat() {
+async function loadFlightData() {
+  const storedData = readStoredData();
+
+  if (storedData) {
+    return storedData;
+  }
+
+  try {
+    const response = await fetch(DEFAULT_DATA_URL, { cache: "no-store" });
+
+    if (!response.ok) {
+      throw new Error(`A kezdő adatok betöltése sikertelen (${response.status}).`);
+    }
+
+    const defaultData = normalizeFlightData(await response.json());
+
+    if (!defaultData) {
+      throw new Error("A kezdő adatok formátuma érvénytelen.");
+    }
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultData));
+    return defaultData;
+  } catch (error) {
+    console.error("A kezdő járatok betöltése sikertelen:", error);
+    return createEmptyFlightData();
+  }
+}
+
+function saveFlightData() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(flightData));
+  } catch (error) {
+    console.error("A járatok mentése sikertelen:", error);
+    showMessage("A járatok mentése sikertelen.", true);
+  }
+}
+
+function readFormData() {
   return Object.fromEntries(
-    Object.entries(mezok).map(([nev, mezo]) => [nev, mezo.value.trim()]),
+    Object.entries(fields).map(([name, field]) => [name, field.value.trim()]),
   );
 }
 
-function toltsdKiAzUrlapot(jarat) {
-  Object.entries(mezok).forEach(([nev, mezo]) => {
-    mezo.value = jarat[nev];
+function fillForm(flight) {
+  Object.entries(fields).forEach(([name, field]) => {
+    field.value = flight[name];
   });
 }
 
-function jaratHozzaadasa(event) {
+function validateFlightTimes(flight) {
+  const departure = new Date(flight.departureTime);
+  const arrival = new Date(flight.arrivalTime);
+
+  if (Number.isNaN(departure.getTime()) || Number.isNaN(arrival.getTime())) {
+    return "Adj meg érvényes indulási és érkezési időt.";
+  }
+
+  if (arrival <= departure) {
+    return "Az érkezési időnek későbbinek kell lennie az indulási időnél.";
+  }
+
+  return "";
+}
+
+function handleFormSubmit(event) {
   event.preventDefault();
 
   if (!form.reportValidity()) {
     return;
   }
 
-  const szerkesztettId = Number(jaratIdInput.value);
-  const ujJarat = {
-    ...olvasdKiAzUrlapAdatokat(),
-    id: szerkesztettId || Date.now(),
+  const editedId = Number(flightIdInput.value);
+  const updatedFlight = {
+    ...readFormData(),
+    id: editedId || Date.now(),
   };
+  const timeError = validateFlightTimes(updatedFlight);
 
-  if (jaratSzamMarLetezik(ujJarat, szerkesztettId)) {
-    mutassUzenetet("Ez a járatszám már szerepel a listában.", true);
+  if (timeError) {
+    showMessage(timeError, true);
     return;
   }
 
-  if (szerkesztettId) {
-    frissitsdAJaratot(ujJarat);
-  } else {
-    objRepuloJaratok.atszallasok.push(ujJarat);
+  if (flightNumberExists(updatedFlight, editedId)) {
+    showMessage("Ez a járatszám már szerepel a listában.", true);
+    return;
   }
 
-  mentsdAzAdatokat();
-  jelenitsdMegAJaratokat();
-  alaphelyzetbeAllit();
-  mutassUzenetet(
-    szerkesztettId
+  if (editedId) {
+    updateFlight(updatedFlight);
+  } else {
+    flightData.flights.push(updatedFlight);
+  }
+
+  saveFlightData();
+  renderFlights();
+  resetForm();
+  showMessage(
+    editedId
       ? "A járat módosításai elmentve."
       : "A járat hozzáadva és elmentve.",
   );
 }
 
-function jaratSzamMarLetezik(jarat, kivetelId) {
-  return objRepuloJaratok.atszallasok.some(
-    (mentettJarat) =>
-      mentettJarat.jaratSzam.toLowerCase() === jarat.jaratSzam.toLowerCase() &&
-      mentettJarat.id !== kivetelId,
+function flightNumberExists(flight, excludedId) {
+  return flightData.flights.some(
+    (savedFlight) =>
+      savedFlight.flightNumber.toLocaleLowerCase() ===
+        flight.flightNumber.toLocaleLowerCase() &&
+      savedFlight.id !== excludedId,
   );
 }
 
-function frissitsdAJaratot(frissitettJarat) {
-  const index = objRepuloJaratok.atszallasok.findIndex(
-    (jarat) => jarat.id === frissitettJarat.id,
+function updateFlight(updatedFlight) {
+  const index = flightData.flights.findIndex(
+    (flight) => flight.id === updatedFlight.id,
   );
 
   if (index !== -1) {
-    objRepuloJaratok.atszallasok[index] = frissitettJarat;
+    flightData.flights[index] = updatedFlight;
   }
 }
 
-function jaratModositas(id) {
-  const jarat = keresdMegAJaratot(id);
+function editFlight(id) {
+  const flight = findFlight(id);
 
-  if (!jarat) {
+  if (!flight) {
     return;
   }
 
-  toltsdKiAzUrlapot(jarat);
-  jaratIdInput.value = id;
-  valtsModositasiModusra(true);
-  mezok.jaratSzam.focus();
+  fillForm(flight);
+  flightIdInput.value = id;
+  setEditMode(true);
+  fields.flightNumber.focus();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-function jaratTorles(id) {
-  objRepuloJaratok.atszallasok = objRepuloJaratok.atszallasok.filter(
-    (jarat) => jarat.id !== id,
-  );
-
-  mentsdAzAdatokat();
-  jelenitsdMegAJaratokat();
-  mutassUzenetet("A járat törölve lett.");
+function deleteFlight(id) {
+  flightData.flights = flightData.flights.filter((flight) => flight.id !== id);
+  saveFlightData();
+  renderFlights();
+  showMessage("A járat törölve lett.");
 }
 
-function keresdMegAJaratot(id) {
-  return objRepuloJaratok.atszallasok.find((jarat) => jarat.id === id);
+function findFlight(id) {
+  return flightData.flights.find((flight) => flight.id === id);
 }
 
-function valtsModositasiModusra(aktiv) {
-  formMode.textContent = aktiv ? "Szerkesztés" : "Új járat";
-  submitButton.textContent = aktiv ? "Mentés" : "Hozzáadás";
-  cancelButton.hidden = !aktiv;
+function setEditMode(active) {
+  formMode.textContent = active ? "Szerkesztés" : "Új járat";
+  submitButton.textContent = active ? "Mentés" : "Hozzáadás";
+  cancelButton.hidden = !active;
 }
 
-function alaphelyzetbeAllit() {
+function resetForm() {
   form.reset();
-  jaratIdInput.value = "";
-  valtsModositasiModusra(false);
+  flightIdInput.value = "";
+  setEditMode(false);
 }
 
-function jelenitsdMegAJaratokat() {
-  lista.replaceChildren();
-  flightCount.textContent = `${objRepuloJaratok.atszallasok.length} járat`;
+function renderFlights() {
+  flightList.replaceChildren();
+  flightCount.textContent = `${flightData.flights.length} járat`;
 
-  if (objRepuloJaratok.atszallasok.length === 0) {
-    lista.innerHTML =
+  if (flightData.flights.length === 0) {
+    flightList.innerHTML =
       '<div class="empty-state">Még nincs mentett járat. Töltsd ki a fenti űrlapot az első hozzáadásához.</div>';
     return;
   }
 
-  objRepuloJaratok.atszallasok.forEach((jarat) => {
-    lista.appendChild(keszitsJaratKartyat(jarat));
+  flightData.flights.forEach((flight) => {
+    flightList.appendChild(createFlightCard(flight));
   });
 }
 
-function keszitsJaratKartyat(jarat) {
-  const kartya = document.createElement("article");
-  kartya.className = "flight-card";
-  kartya.innerHTML = `
+function createFlightCard(flight) {
+  const card = document.createElement("article");
+  card.className = "flight-card";
+  card.innerHTML = `
     <div class="flight-route">
-      <span>${escapeHtml(jarat.indulasiHely)}</span>
+      <span>${escapeHtml(flight.departureLocation)}</span>
       <b>→</b>
-      <span>${escapeHtml(jarat.erkezesiHely)}</span>
+      <span>${escapeHtml(flight.arrivalLocation)}</span>
     </div>
-    <strong class="flight-number">${escapeHtml(jarat.jaratSzam)}</strong>
+    <strong class="flight-number">${escapeHtml(flight.flightNumber)}</strong>
     <div class="flight-times">
-      <span>Indulás<br><b>${formatDatum(jarat.indulasiIdo)}</b></span>
-      <span>Érkezés<br><b>${formatDatum(jarat.erkezesiIdo)}</b></span>
+      <span>Indulás<br><b>${formatDate(flight.departureTime)}</b></span>
+      <span>Érkezés<br><b>${formatDate(flight.arrivalTime)}</b></span>
     </div>
     <div class="card-actions">
-      <button class="button button-secondary" type="button" data-edit="${jarat.id}">
+      <button class="button button-secondary" type="button" data-edit="${flight.id}">
         Módosítás
       </button>
-      <button class="button button-danger" type="button" data-delete="${jarat.id}">
+      <button class="button button-danger" type="button" data-delete="${flight.id}">
         Törlés
       </button>
     </div>
   `;
 
-  return kartya;
+  return card;
 }
 
-function formatDatum(datum) {
+function formatDate(value) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Érvénytelen időpont";
+  }
+
   return new Intl.DateTimeFormat("hu-HU", {
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(new Date(datum));
+  }).format(date);
 }
 
 function escapeHtml(value) {
-  const karakterek = {
+  const characters = {
     "&": "&amp;",
     "<": "&lt;",
     ">": "&gt;",
@@ -217,38 +296,42 @@ function escapeHtml(value) {
     "'": "&#039;",
   };
 
-  return String(value).replace(/[&<>"']/g, (karakter) => karakterek[karakter]);
+  return String(value).replace(/[&<>"']/g, (character) => characters[character]);
 }
 
-function mutassUzenetet(szoveg, hiba = false) {
-  statusMessage.textContent = szoveg;
-  statusMessage.className = `status-message ${hiba ? "error" : "success"}`;
+function showMessage(message, isError = false) {
+  statusMessage.textContent = message;
+  statusMessage.className = `status-message ${isError ? "error" : "success"}`;
 
-  setTimeout(() => {
+  clearTimeout(messageTimeoutId);
+  messageTimeoutId = setTimeout(() => {
     statusMessage.textContent = "";
     statusMessage.className = "status-message";
   }, 3500);
 }
 
-form.addEventListener("submit", jaratHozzaadasa);
+async function initializeApp() {
+  flightData = await loadFlightData();
+  renderFlights();
+}
 
-cancelButton.addEventListener("click", alaphelyzetbeAllit);
-
+form.addEventListener("submit", handleFormSubmit);
+cancelButton.addEventListener("click", resetForm);
 document
   .getElementById("displayButton")
-  .addEventListener("click", jelenitsdMegAJaratokat);
+  .addEventListener("click", renderFlights);
 
-lista.addEventListener("click", (event) => {
-  const szerkesztesGomb = event.target.closest("[data-edit]");
-  const torlesGomb = event.target.closest("[data-delete]");
+flightList.addEventListener("click", (event) => {
+  const editButton = event.target.closest("[data-edit]");
+  const deleteButton = event.target.closest("[data-delete]");
 
-  if (szerkesztesGomb) {
-    jaratModositas(Number(szerkesztesGomb.dataset.edit));
+  if (editButton) {
+    editFlight(Number(editButton.dataset.edit));
   }
 
-  if (torlesGomb && confirm("Biztosan törlöd ezt a járatot?")) {
-    jaratTorles(Number(torlesGomb.dataset.delete));
+  if (deleteButton && confirm("Biztosan törlöd ezt a járatot?")) {
+    deleteFlight(Number(deleteButton.dataset.delete));
   }
 });
 
-jelenitsdMegAJaratokat();
+initializeApp();
