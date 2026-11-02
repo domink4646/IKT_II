@@ -83,9 +83,7 @@ async function loadFlightData() {
     const response = await fetch(DEFAULT_DATA_URL, { cache: "no-store" });
 
     if (!response.ok) {
-      throw new Error(
-        `A kezdő adatok betöltése sikertelen (${response.status}).`,
-      );
+      throw new Error(`A kezdő adatok betöltése sikertelen (${response.status}).`);
     }
 
     const defaultData = normalizeFlightData(await response.json());
@@ -298,10 +296,7 @@ function escapeHtml(value) {
     "'": "&#039;",
   };
 
-  return String(value).replace(
-    /[&<>"']/g,
-    (character) => characters[character],
-  );
+  return String(value).replace(/[&<>"']/g, (character) => characters[character]);
 }
 
 function showMessage(message, isError = false) {
