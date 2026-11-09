@@ -1,0 +1,25 @@
+{
+  "name": "ikt_ii",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "module": "./autozas.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/domink4646/IKT_II.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/domink4646/IKT_II/issues"
+  },
+  "homepage": "https://github.com/domink4646/IKT_II#readme"
+}
